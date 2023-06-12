@@ -7,7 +7,6 @@ export default {
   }),
   mutations: {
     setSelectedData(state, data) {
-      console.log(state, data);
       setItem(SELECT_DATA, data);
     },
   },

@@ -3,6 +3,18 @@
     <thead>
       <tr>
         <th class="border p-2 text-lg text-right" colspan="50">
+          <button
+            @click="selectHomeDayGoldTime"
+            class="bg-blue-500 hover:bg-blue-700 text-sm text-white font-bold py-1 px-2 rounded mr-1"
+          >
+            工作日黄金时间
+          </button>
+          <button
+            @click="selectWeekendGoldTime"
+            class="bg-blue-500 hover:bg-blue-700 text-sm text-white font-bold py-1 px-2 rounded mr-1"
+          >
+            休息日黄金时间
+          </button>
           <span class="w-4 text-sm mr-1">
             <span
               class="w-3 inline-block h-[8px] bg-blue-400 rounded mr-1 align-middle"
@@ -95,6 +107,10 @@ const WEEKS = [
   "星期日",
 ];
 const DATA_LENGTH = 48;
+const GOLDEN_TIME = new Set([
+  18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
+  37, 38, 39, 40, 41,
+]);
 </script>
 <script setup>
 import { ref, reactive, watch, defineExpose, toRaw } from "vue";
@@ -176,6 +192,20 @@ const clearData = () => {
   Object.keys(resultDataList).forEach((key) => delete resultDataList[key]);
   emits("update:modelValue", resultDataList);
 };
+const selectHomeDayGoldTime = () => {
+  resultDataList["0"] = new Set(GOLDEN_TIME);
+  resultDataList["1"] = new Set(GOLDEN_TIME);
+  resultDataList["2"] = new Set(GOLDEN_TIME);
+  resultDataList["3"] = new Set(GOLDEN_TIME);
+  resultDataList["4"] = new Set(GOLDEN_TIME);
+  emits("update:modelValue", resultDataList);
+};
+const selectWeekendGoldTime = () => {
+  resultDataList["5"] = new Set(GOLDEN_TIME);
+  resultDataList["6"] = new Set(GOLDEN_TIME);
+  emits("update:modelValue", resultDataList);
+};
+
 const getSelectData = () => {
   return toRaw(resultDataList);
 };

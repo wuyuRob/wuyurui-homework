@@ -28,7 +28,6 @@ const showSelectedData = () => {
 };
 const store = useStore();
 const selectedData = store.state.homework.selectedData;
-console.log("selectedData", selectedData);
 const saveSelectedData = () => {
   store.commit("homework/setSelectedData", homeWork.value.getSelectData());
 };
