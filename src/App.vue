@@ -18,19 +18,19 @@
   </div>
 </template>
 <script setup>
-import { ref } from "vue";
-import { useStore } from "vuex";
-import HomeWork from "./components/HomeWork.vue";
+import { ref } from 'vue'
+import { useStore } from 'vuex'
+import HomeWork from './components/HomeWork.vue'
 
-const homeWork = ref(null);
+const homeWork = ref(null)
 const showSelectedData = () => {
-  alert(JSON.stringify(homeWork.value.getTimeResultList()));
-};
-const store = useStore();
-const selectedData = store.state.homework.selectedData;
+  alert(JSON.stringify(homeWork.value.getTimeResultList()))
+}
+const store = useStore()
+const selectedData = store.state.homework.selectedData
 const saveSelectedData = () => {
-  store.commit("homework/setSelectedData", homeWork.value.getSelectData());
-};
+  store.commit('homework/setSelectedData', homeWork.value.getSelectData())
+}
 </script>
 
 <style scoped>

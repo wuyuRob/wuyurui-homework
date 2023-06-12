@@ -50,14 +50,14 @@
         </td>
       </tr>
       <tr v-for="(weekItem, weekIndex) in WEEKS" :key="weekIndex">
-        <td class="border p-2 text-lg">{{ weekItem }}</td>
+        <td class="border p-2 text-lg text-center">{{ weekItem }}</td>
         <td
           class="p-0"
           v-for="(dataItem, dataIndex) in DATA_LENGTH"
           :key="dataIndex"
           :class="{
             selected: isSelected(weekIndex, dataIndex),
-            unselected: !isSelected(weekIndex, dataIndex),
+            unselected: !isSelected(weekIndex, dataIndex)
           }"
           @mousedown="startSelection(weekIndex, dataIndex)"
           @mouseup="endSelectItem(weekIndex, dataIndex)"
@@ -82,9 +82,9 @@
             @click="clearData"
             >清空</span
           >
-          <ul>
+          <ul class="mt-3 pr-3">
             <li
-              class="m-1 w-full overflow-hidden break-all pr-4"
+              class="m-1 w-full overflow-hidden break-all"
               v-for="(time, resultIndex) in timeResultList"
               :key="resultIndex"
             >
@@ -98,124 +98,118 @@
 </template>
 <script>
 const WEEKS = [
-  "星期一",
-  "星期二",
-  "星期三",
-  "星期四",
-  "星期五",
-  "星期六",
-  "星期日",
-];
-const DATA_LENGTH = 48;
+  '星期一',
+  '星期二',
+  '星期三',
+  '星期四',
+  '星期五',
+  '星期六',
+  '星期日'
+]
+const DATA_LENGTH = 48
 const GOLDEN_TIME = new Set([
   18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
-  37, 38, 39, 40, 41,
-]);
+  37, 38, 39, 40, 41
+])
 </script>
 <script setup>
-import { ref, reactive, watch, defineExpose, toRaw } from "vue";
-
-const generateData = (i) => {
-  const hour = Math.floor(i / 2);
-  const minute = i % 2 === 0 ? "00" : "30";
-  const nextHour = Math.floor((i + 1) / 2);
-  const nextMinute = (i + 1) % 2 === 0 ? "00" : "30";
-  return `${hour}:${minute}~${nextHour}:${nextMinute}`;
-};
-
+import { ref, reactive, watch, toRaw } from 'vue'
 const props = defineProps({
   modelValue: {
     type: Object,
-    required: () => ({}),
-  },
-});
-const emits = defineEmits(["update:modelValue"]);
+    required: () => ({})
+  }
+})
+const emits = defineEmits(['update:modelValue'])
 
-const resultDataList = reactive(props.modelValue);
+const resultDataList = reactive(props.modelValue)
 
-const timeResultList = ref({});
+const timeResultList = ref({})
+const generateData = (i) => {
+  const hour = Math.floor(i / 2)
+  const minute = i % 2 === 0 ? '00' : '30'
+  const nextHour = Math.floor((i + 1) / 2)
+  const nextMinute = (i + 1) % 2 === 0 ? '00' : '30'
+  return `${hour}:${minute}~${nextHour}:${nextMinute}`
+}
 watch(
   resultDataList,
   (newVal) => {
-    let result = {};
+    let result = {}
     for (const key in newVal) {
-      const innerObj = newVal[key];
-      let str = "";
+      const innerObj = newVal[key]
+      let str = ''
       for (const item of innerObj) {
-        str += `${generateData(item)},`;
+        str += `${generateData(item)},`
       }
-      result[key] = str;
+      result[key] = str
     }
-    timeResultList.value = result;
+    timeResultList.value = result
   },
   { immediate: true }
-);
+)
 
 // 拖拽选中逻辑
-let isDragSelecting = false;
-
+let isDragSelecting = false
 const isSelected = (weekIndex, index) => {
-  return resultDataList[weekIndex] && resultDataList[weekIndex].has(index);
-};
+  return resultDataList[weekIndex] && resultDataList[weekIndex].has(index)
+}
 // 鼠标拖拽事件
 const startSelection = (weekIndex, dataIndex) => {
   if (!resultDataList[weekIndex]) {
-    resultDataList[weekIndex] = new Set();
+    resultDataList[weekIndex] = new Set()
   }
-  isDragSelecting = true;
-  handleIndex(weekIndex, dataIndex);
-};
+  isDragSelecting = true
+  handleIndex(weekIndex, dataIndex)
+}
 const endSelectItem = (weekIndex, index) => {
-  isDragSelecting = false;
-  emits("update:modelValue", resultDataList);
-};
+  isDragSelecting = false
+  emits('update:modelValue', resultDataList)
+}
 const selectItem = (weekIndex, index) => {
   if (isDragSelecting) {
-    handleIndex(weekIndex, index);
+    handleIndex(weekIndex, index)
   }
-};
+}
 const handleIndex = (weekIndex, index) => {
   if (!resultDataList[weekIndex]) {
-    return;
+    return
   }
   if (resultDataList[weekIndex].has(index)) {
-    resultDataList[weekIndex].delete(index);
+    resultDataList[weekIndex].delete(index)
   } else {
-    resultDataList[weekIndex].add(index);
+    resultDataList[weekIndex].add(index)
   }
   if (resultDataList[weekIndex].size === 0) {
-    delete resultDataList[weekIndex];
+    delete resultDataList[weekIndex]
   }
-};
+}
 // 清空
 const clearData = () => {
-  Object.keys(resultDataList).forEach((key) => delete resultDataList[key]);
-  emits("update:modelValue", resultDataList);
-};
+  Object.keys(resultDataList).forEach((key) => delete resultDataList[key])
+  emits('update:modelValue', resultDataList)
+}
 const selectHomeDayGoldTime = () => {
-  resultDataList["0"] = new Set(GOLDEN_TIME);
-  resultDataList["1"] = new Set(GOLDEN_TIME);
-  resultDataList["2"] = new Set(GOLDEN_TIME);
-  resultDataList["3"] = new Set(GOLDEN_TIME);
-  resultDataList["4"] = new Set(GOLDEN_TIME);
-  emits("update:modelValue", resultDataList);
-};
+  for (let i = 0; i < 5; i++) {
+    resultDataList[i] = new Set(GOLDEN_TIME)
+  }
+  emits('update:modelValue', resultDataList)
+}
 const selectWeekendGoldTime = () => {
-  resultDataList["5"] = new Set(GOLDEN_TIME);
-  resultDataList["6"] = new Set(GOLDEN_TIME);
-  emits("update:modelValue", resultDataList);
-};
-
+  resultDataList['5'] = new Set(GOLDEN_TIME)
+  resultDataList['6'] = new Set(GOLDEN_TIME)
+  emits('update:modelValue', resultDataList)
+}
 const getSelectData = () => {
-  return toRaw(resultDataList);
-};
+  return toRaw(resultDataList)
+}
 const getTimeResultList = () => {
-  return timeResultList;
-};
+  return timeResultList
+}
 defineExpose({
   getSelectData,
-  getTimeResultList,
-});
+  getTimeResultList
+})
 </script>
 <style lang="scss" scoped>
 table {

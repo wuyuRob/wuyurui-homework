@@ -1,14 +1,14 @@
-import { SELECT_DATA } from "@/constants/index.js";
-import { getItem, setItem } from "@/utils/storage";
+import { SELECT_DATA } from '@/constants/index.js'
+import { getItem, setItem } from '@/utils/storage'
 export default {
   namespaced: true,
   state: () => ({
-    selectedData: getItem(SELECT_DATA) || {},
+    selectedData: getItem(SELECT_DATA) || {}
   }),
   mutations: {
     setSelectedData(state, data) {
-      setItem(SELECT_DATA, data);
-    },
+      setItem(SELECT_DATA, data)
+    }
   },
-  actions: {},
-};
+  actions: {}
+}
