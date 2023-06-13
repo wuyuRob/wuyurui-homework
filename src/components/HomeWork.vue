@@ -49,19 +49,22 @@
           <div class="p-0 text-sm text-center w-4">{{ index - 1 }}</div>
         </td>
       </tr>
-      <tr v-for="(weekItem, weekIndex) in WEEKS" :key="weekIndex">
+      <tr
+        v-for="(weekItem, weekIndex) in WEEKS"
+        :key="weekIndex"
+        id="drag-container"
+      >
         <td class="border p-2 text-lg text-center">{{ weekItem }}</td>
         <td
           class="p-0"
           v-for="(dataItem, dataIndex) in DATA_LENGTH"
           :key="dataIndex"
           :class="{
+            target1: true,
+            [`selected-class-${weekIndex}-${dataIndex}`]: true,
             selected: isSelected(weekIndex, dataIndex),
             unselected: !isSelected(weekIndex, dataIndex)
           }"
-          @mousedown="startSelection(weekIndex, dataIndex)"
-          @mouseup="endSelectItem(weekIndex, dataIndex)"
-          @mouseover="selectItem(weekIndex, dataIndex)"
         ></td>
       </tr>
       <tr>
@@ -95,6 +98,15 @@
       </tr>
     </tbody>
   </table>
+  <Selecto
+    :selectableTargets="['.target1']"
+    :dragContainer="dragContainer"
+    :hitRate="1"
+    :selectFromInside="true"
+    :selectByClick="true"
+    :toggleContinueSelect="'shift'"
+    @selectEnd="onSelectEnd"
+  />
 </template>
 <script>
 const WEEKS = [
@@ -113,7 +125,9 @@ const GOLDEN_TIME = new Set([
 ])
 </script>
 <script setup>
-import { ref, reactive, watch, toRaw } from 'vue'
+import { ref, reactive, watch, toRaw, onMounted, onUnmounted } from 'vue'
+import Selecto from './Selecto.vue'
+
 const props = defineProps({
   modelValue: {
     type: Object,
@@ -138,10 +152,7 @@ watch(
     let result = {}
     for (const key in newVal) {
       const innerObj = newVal[key]
-      let str = ''
-      for (const item of innerObj) {
-        str += `${generateData(item)},`
-      }
+      let str = Array.from(innerObj, generateData).join(',')
       result[key] = str
     }
     timeResultList.value = result
@@ -150,30 +161,36 @@ watch(
 )
 
 // 拖拽选中逻辑
-let isDragSelecting = false
 const isSelected = (weekIndex, index) => {
   return resultDataList[weekIndex] && resultDataList[weekIndex].has(index)
 }
-// 鼠标拖拽事件
-const startSelection = (weekIndex, dataIndex) => {
-  if (!resultDataList[weekIndex]) {
-    resultDataList[weekIndex] = new Set()
-  }
-  isDragSelecting = true
-  handleIndex(weekIndex, dataIndex)
-}
-const endSelectItem = (weekIndex, index) => {
-  isDragSelecting = false
-  emits('update:modelValue', resultDataList)
-}
-const selectItem = (weekIndex, index) => {
-  if (isDragSelecting) {
-    handleIndex(weekIndex, index)
-  }
+
+// 拖拽选中的逻辑
+const dragContainer = document.getElementById('drag-container')
+const onSelectEnd = (e) => {
+  e.selected.forEach((el) => {
+    const regex = /selected-class-(\d+)-(\d+)/g
+    const matches = el?.classList?.value?.match(regex)
+    let result = []
+    let weekIndex
+    let dataIndex
+    if (matches) {
+      matches.forEach((match) => {
+        result = match.match(/\d+/g)
+        if (result) {
+          weekIndex = result?.[0]
+          dataIndex = result?.[1]
+          if (weekIndex && dataIndex) {
+            handleIndex(parseInt(weekIndex), parseInt(dataIndex))
+          }
+        }
+      })
+    }
+  })
 }
 const handleIndex = (weekIndex, index) => {
   if (!resultDataList[weekIndex]) {
-    return
+    resultDataList[weekIndex] = new Set()
   }
   if (resultDataList[weekIndex].has(index)) {
     resultDataList[weekIndex].delete(index)
@@ -184,6 +201,7 @@ const handleIndex = (weekIndex, index) => {
     delete resultDataList[weekIndex]
   }
 }
+
 // 清空
 const clearData = () => {
   Object.keys(resultDataList).forEach((key) => delete resultDataList[key])
