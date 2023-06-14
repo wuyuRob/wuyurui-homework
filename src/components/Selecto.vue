@@ -4,10 +4,13 @@
 
 <script>
 import VanillaSelecto, { OPTIONS, EVENTS, PROPERTIES, METHODS } from 'selecto'
-import { isUndefined } from '@daybrush/utils'
 import { defineComponent } from 'vue'
 
 const methods = {}
+
+function isUndefined(value) {
+  return typeof value === 'undefined'
+}
 
 METHODS.forEach((name) => {
   methods[name] = function (...args) {
